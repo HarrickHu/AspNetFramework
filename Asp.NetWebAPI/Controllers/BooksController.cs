@@ -13,11 +13,14 @@ using Asp.NetWebAPI.Models;
 
 namespace Asp.NetWebAPI.Controllers
 {
+    [RoutePrefix("api/books")]
     public class BooksController : ApiController
     {
-        private AspNetWebAPIContext db = new AspNetWebAPIContext();
+        private readonly AspNetWebAPIContext db = new AspNetWebAPIContext();
 
         // GET: api/Books
+        [Route("")]
+        [HttpGet]
         public IQueryable<BookDto> GetBooks()
         {
             var books = from b in db.Books
@@ -31,6 +34,8 @@ namespace Asp.NetWebAPI.Controllers
         }
 
         // GET: api/Books/5
+        [Route("{id:int}", Name = "GetBookById")]
+        [HttpGet]
         [ResponseType(typeof(BookDetailDto))]
         public async Task<IHttpActionResult> GetBook(int id)
         {
@@ -53,6 +58,8 @@ namespace Asp.NetWebAPI.Controllers
             return Ok(book);
         }
         // PUT: api/Books/5
+        [Route("{id:int}")]
+        [HttpPut]
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> PutBook(int id, Book book)
         {
@@ -88,6 +95,8 @@ namespace Asp.NetWebAPI.Controllers
         }
 
         // POST: api/Books
+        [Route("")]
+        [HttpPost]
         [ResponseType(typeof(BookDto))]
         public async Task<IHttpActionResult> PostBook(Book book)
         {
@@ -114,6 +123,8 @@ namespace Asp.NetWebAPI.Controllers
         }
 
         // DELETE: api/Books/5
+        [Route("{id:int}")]
+        [HttpDelete]
         [ResponseType(typeof(Book))]
         public async Task<IHttpActionResult> DeleteBook(int id)
         {
@@ -125,6 +136,101 @@ namespace Asp.NetWebAPI.Controllers
 
             db.Books.Remove(book);
             await db.SaveChangesAsync();
+
+            return Ok(book);
+        }
+
+        // GET /api/authors/1/books
+        [Route("~/api/authors/{authorId:int}/books")]
+        [HttpGet]
+        public IEnumerable<BookDetailDto> GetByAuthorId(int authorId)
+        {
+            var books = db.Books.Include(b => b.Author)
+                .Where(predicate: b => b.AuthorId == authorId)
+                .Select(b =>
+                new BookDetailDto()
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Year = b.Year,
+                    Price = b.Price,
+                    AuthorName = b.Author.Name,
+                    Genre = b.Genre
+                });
+
+            return books;
+        }
+
+        // GET /api/authors/Jane Austen/books
+        [Route("~/api/authors/{authorName}/books")]
+        [HttpGet]
+        public IEnumerable<BookDetailDto> GetByAuthorName(string authorName)
+        {
+            var books = db.Books.Include(b => b.Author)
+                .Where(predicate: b => b.Author.Name == authorName)
+                .Select(b =>
+                new BookDetailDto()
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Year = b.Year,
+                    Price = b.Price,
+                    AuthorName = b.Author.Name,
+                    Genre = b.Genre
+                });
+
+            return books;
+        }
+
+        /// <summary>
+        /// 测试自定义约束类型
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Route("NonZero/{id:nonzero}")]
+        public async Task<IHttpActionResult> GetBookByNonZero(int id)
+        {
+            var book = await db.Books.Include(b => b.Author).Select(b =>
+                new BookDetailDto()
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Year = b.Year,
+                    Price = b.Price,
+                    AuthorName = b.Author.Name,
+                    Genre = b.Genre
+                }).SingleOrDefaultAsync(b => b.Id == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(book);
+        }
+
+        /// <summary>
+        /// 可选 URI 参数和默认值
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Route("Locale/{id:int?}")]
+        public async Task<IHttpActionResult> GetBooksByLocale(int id = 1) {
+            var book = await db.Books.Include(b => b.Author).Select(b =>
+                new BookDetailDto()
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Year = b.Year,
+                    Price = b.Price,
+                    AuthorName = b.Author.Name,
+                    Genre = b.Genre
+                }).SingleOrDefaultAsync(b => b.Id == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
 
             return Ok(book);
         }

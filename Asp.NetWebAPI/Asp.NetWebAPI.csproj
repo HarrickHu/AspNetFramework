@@ -173,6 +173,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Http\NonZeroConstraint.cs" />
+    <Compile Include="Http\TextResult.cs" />
     <Compile Include="Migrations\202104270658429_Initial.cs" />
     <Compile Include="Migrations\202104270658429_Initial.Designer.cs">
       <DependentUpon>202104270658429_Initial.cs</DependentUpon>

@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using Asp.NetWebAPI.Models;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Asp.NetWebAPI.Models;
 
 namespace Asp.NetWebAPI.Controllers
 {
     public class AuthorsController : ApiController
     {
-        private AspNetWebAPIContext db = new AspNetWebAPIContext();
+        private readonly AspNetWebAPIContext db = new AspNetWebAPIContext();
 
         // GET: api/Authors
         public IQueryable<Author> GetAuthors()
